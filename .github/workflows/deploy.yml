@@ -1,0 +1,68 @@
+name: 'Azure Terraform CI/CD'
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: 'Deploy and Test'
+    runs-on: ubuntu-latest
+
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_USE_OIDC: true
+
+    steps:
+      - name: 'Checkout Code'
+        uses: actions/checkout@v3
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: 'Terraform Setup'
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+      - name: 'Terraform Init'
+        run: terraform init
+      - name: 'Terraform Apply'
+        run: terraform apply -auto-approve
+      - name: 'Run Integration Tests'
+        run: |
+          echo "🧪 Running automated integration tests..."
+
+          WEBSITE_URL=$(terraform output -raw website_url)
+
+          # Test A: Check if HTTP status is 200
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$WEBSITE_URL")
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "✅ Test A Passed: HTTP status is 200"
+          else
+              echo "❌ Test A Failed: HTTP status is $HTTP_STATUS"
+              exit 1
+          fi
+
+          # Test B: Check if the content contains a specific string
+          EXPECTED_STRING="Hello Azure!"
+          ACTUAL_CONTENT=$(curl -s "$WEBSITE_URL")
+
+          if [[ "$ACTUAL_CONTENT" == *"$EXPECTED_STRING"* ]]; then
+              echo "✅ Test B Passed: Content contains the expected string"
+          else
+              echo "❌ Test B Failed: Content does not contain the expected string"
+              exit 1
+          fi
+
+          echo "==============================================================="
+          echo "🎉 All tests passed! Your static website is live and functioning correctly."
+          echo "==============================================================="
