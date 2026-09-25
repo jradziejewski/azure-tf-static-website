@@ -21,22 +21,37 @@ jobs:
       ARM_USE_OIDC: true
 
     steps:
+
+      # 1. Checkout the repository code
       - name: 'Checkout Code'
         uses: actions/checkout@v3
+
+      # 2. Run tfsec Security Scan
+      - name: 'Run tfsec Security Scan'
+        uses: aquasecurity/tfsec-action@v1.0.0
+
+      # 3. Login to Azure using OIDC
       - name: Azure Login
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      #4. Setup Terraform
       - name: 'Terraform Setup'
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
+
+      #5. Terraform Init and Apply
       - name: 'Terraform Init'
         run: terraform init
+
       - name: 'Terraform Apply'
         run: terraform apply -auto-approve
+
+      # 6. Run Integration Tests
       - name: 'Run Integration Tests'
         run: |
           echo "🧪 Running automated integration tests..."
