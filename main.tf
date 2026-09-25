@@ -6,7 +6,7 @@ resource "random_string" "unique_suffix" {
 
 resource "azurerm_resource_group" "rg" {
   name     = "rg-hello-world-dev"
-  location = "polandcentral"
+  location = "switzerlandnorth"
 }
 
 resource "azurerm_storage_account" "storage" {
