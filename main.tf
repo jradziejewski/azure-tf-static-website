@@ -100,7 +100,7 @@ resource "azurerm_linux_function_app" "fn_app" {
 
   site_config {
     application_stack {
-      python_version = "3.9"
+      python_version = "3.11"
     }
     cors { allowed_origins = ["*"] }
   }
