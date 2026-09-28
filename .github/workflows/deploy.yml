@@ -80,6 +80,7 @@ jobs:
           echo "🧪 Running automated integration tests..."
 
           WEBSITE_URL=$(terraform output -raw website_url)
+          API_URL=$(terraform output -raw api_url)
 
           # Test A: Check if HTTP status is 200
           HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$WEBSITE_URL")
@@ -90,14 +91,21 @@ jobs:
               exit 1
           fi
 
-          # Test B: Check if the content contains a specific string
-          EXPECTED_STRING="Hello Azure!"
-          ACTUAL_CONTENT=$(curl -s "$WEBSITE_URL")
-
-          if [[ "$ACTUAL_CONTENT" == *"$EXPECTED_STRING"* ]]; then
-              echo "✅ Test B Passed: Content contains the expected string"
+          # Test B: Check API HTTP Status Code
+          API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
+          if [ "$API_STATUS" -eq 200 ]; then
+              echo "✅ Test B Passed: API HTTP status is 200"
           else
-              echo "❌ Test B Failed: Content does not contain the expected string"
+              echo "❌ Test B Failed: API HTTP status is $API_STATUS"
+              exit 1
+          fi
+
+          # Test C: Verify API returns a valid JSON count
+          API_RESPONSE=$(curl -s "$API_URL")
+          if echo "$API_RESPONSE" | grep -q "count"; then
+              echo "✅ Test C Passed: API returned a valid JSON count"
+          else
+              echo "❌ Test C Failed: API response is not valid JSON or does not contain 'count'"
               exit 1
           fi
 

@@ -29,8 +29,12 @@ resource "azurerm_storage_blob" "frontend" {
   storage_account_name   = azurerm_storage_account.storage.name
   storage_container_name = "$web"
   type                   = "Block"
-  source                 = "index.html"
-  content_type           = "text/html"
+
+  source_content = templatefile("${path.module}/index.html", {
+    api_url = "https://${azurerm_linux_function_app.fn_app.default_hostname}/api/get_count"
+  })
+
+  content_type = "text/html"
 }
 
 resource "azurerm_cosmosdb_account" "cosmos" {

@@ -24,6 +24,26 @@
         <div class="container">
             <h1>Hello Azure!</h1>
             <p>Welcome to your Azure-hosted web application.</p>
+            <div class="counter">
+                Visitors: <span id="visitorCount">Loading...</span>
+            </div>
         </div>
+
+        <script>
+            const apiUrl = "${api_url}";
+
+            async function fetchVisitorCount() {
+                try {
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    document.getElementById('visitorCount').textContent = data.count;
+                } catch (error) {
+                    console.error('Error fetching visitor count:', error);
+                    document.getElementById('visitorCount').textContent = 'Error loading count';
+                }
+            }
+
+            fetchVisitorCount();
+        </script>
     </body>
 </html>
