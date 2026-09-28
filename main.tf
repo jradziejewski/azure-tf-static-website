@@ -106,8 +106,7 @@ resource "azurerm_linux_function_app" "fn_app" {
   }
 
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME"       = "python"
-    "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
-    "COSMOS_DB_CONNECTION_STRING"    = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
+    "FUNCTIONS_WORKER_RUNTIME"    = "python"
+    "COSMOS_DB_CONNECTION_STRING" = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
   }
 }

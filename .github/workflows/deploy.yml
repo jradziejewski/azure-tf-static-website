@@ -51,7 +51,19 @@ jobs:
       - name: 'Terraform Apply'
         run: terraform apply -auto-approve
         
+      - name: 'Setup Python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: 'Package API'
+        run: |
+          cd api
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --target ".python_packages/lib/site-packages"
+        
       - name: 'Set Function App Name'
+        id: get_fn_name
         run: |
           FN_NAME=$(terraform output -raw function_app_name)
           echo "FUNCTION_APP_NAME=$FN_NAME" >> $GITHUB_ENV
