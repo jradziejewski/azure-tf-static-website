@@ -10,7 +10,7 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 def get_count(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Python HTTP trigger function processed a request")
 
-    connection_string = os.environ.get("COSMOS_CONNECTION_STRING")
+    connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING")
     if not connection_string:
         return func.HttpResponse(
             "Cosmos DB connection string not found",
@@ -18,9 +18,9 @@ def get_count(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     try:
-        client = CosmosCLient.from_connection_string(connection_string)
-        database = client.get_database_client("visitor-db")
-        container = database.get_container_client("visitor-container")
+        client = CosmosClient.from_connection_string(connection_string)
+        database = client.get_database_client("visitors-db")
+        container = database.get_container_client("visitors")
 
         try:
             item = container.read_item(item="counter", partition_key="counter")
@@ -36,7 +36,7 @@ def get_count(req: func.HttpRequest) -> func.HttpResponse:
             headers={
                 "Acess-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET",
-            }
+            })
     except Exception as e:
         logging.error(f"Error accessing Cosmos DB: {e}")
         return func.HttpResponse(
