@@ -13,8 +13,3 @@ output "api_url" {
   description = "The URL of the API endpoint for getting visitor count"
   value       = "https://${azurerm_linux_function_app.fn_app.default_hostname}/api/get_count"
 }
-
-output "cdn_url" {
-  description = "The secure HTTPS URL of the CDN endpoint"
-  value       = "https://${azurerm_cdn_endpoint.cdn_endpoint.fqdn}"
-}

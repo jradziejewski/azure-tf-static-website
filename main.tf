@@ -102,37 +102,11 @@ resource "azurerm_linux_function_app" "fn_app" {
     application_stack {
       python_version = "3.11"
     }
-    cors { allowed_origins = ["*"] }
+    cors { allowed_origins = [replace(azurerm_storage_account.storage.primary_web_endpoint, "/", "")] }
   }
 
   app_settings = {
     "FUNCTIONS_WORKER_RUNTIME"    = "python"
     "COSMOS_DB_CONNECTION_STRING" = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
   }
-}
-
-resource "azurerm_cdn_profile" "cdn_profile" {
-  name                = "cdn-profile-helloworld"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = "global"
-  sku                 = "Standard_Akamai"
-}
-
-resource "azurerm_cdn_endpoint" "cdn_endpoint" {
-  name                = "cdn-ednpoint-${random_string.unique_suffix.result}"
-  profile_name        = azurerm_cdn_profile.cdn_profile.name
-  location            = "global"
-  resource_group_name = azurerm_resource_group.rg.name
-
-  origin {
-    name      = "static-web-origin"
-    host_name = replace(replace(azurerm_storage_account.storage.primary_web_endpoint, "https://", ""), "/", "")
-  }
-
-  origin_host_header = replace(replace(azurerm_storage_account.storage.primary_web_endpoint, "https://", ""), "/", "")
-
-  is_http_allowed  = true
-  is_https_allowed = true
-
-  optimization_type = "GeneralWebDelivery"
 }

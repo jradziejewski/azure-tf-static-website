@@ -80,13 +80,11 @@ jobs:
         run: |
           echo "🧪 Running automated integration tests..."
 
-          CDN_URL=$(terraform output -raw cdn_url)
           WEBSITE_URL=$(terraform output -raw website_url)
           API_URL=$(terraform output -raw api_url)
 
           echo "Testing Website URL: $WEBSITE_URL"
           echo "Testing API URL: $API_URL"
-          echo "Testing CDN URL: $CDN_URL"
 
           # Test A: Check if HTTP status is 200
           HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$WEBSITE_URL")
@@ -112,15 +110,6 @@ jobs:
               echo "✅ Test C Passed: API returned a valid JSON count"
           else
               echo "❌ Test C Failed: API response is not valid JSON or does not contain 'count'"
-              exit 1
-          fi
-
-          # Test D: Check if CDN URL is accessible
-          CDN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CDN_URL")
-          if [ "$CDN_STATUS" -eq 200 ]; then
-              echo "✅ Test D Passed: CDN URL is accessible"
-          else
-              echo "❌ Test D Failed: CDN URL is not accessible, HTTP status is $CDN_STATUS"
               exit 1
           fi
 
