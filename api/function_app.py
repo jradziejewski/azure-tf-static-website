@@ -41,17 +41,13 @@ def get_count(req: func.HttpRequest) -> func.HttpResponse:
 
     connection_string = os.environ.get("COSMOS_DB_CONNECTION_STRING")
     if not connection_string:
-        return func.HttpResponse(
-            "Cosmos DB connection string not found",
-            status_code=500
-        )
+        logging.error("COSMOS_DB_CONNECTION_STRING is not set")
+        return _json_response({"error": "Internal server error"}, 500)
 
     try:
         client = CosmosClient.from_connection_string(connection_string)
         container = client.get_database_client("visitors-db").get_container_client("visitors")
         return _json_response({"count": _increment(container)}, 200)
-    except Exception as e:
-        logging.error(f"Error accessing Cosmos DB: {e}")
-        return func.HttpResponse(
-            f"Internal Server Error: {e}", status_code=500
-        )
+    except Exception:
+        logging.exception("Error accessing Cosmos DB")
+        return _json_response({"error": "Internal server error"}, 500)
