@@ -102,7 +102,7 @@ resource "azurerm_linux_function_app" "fn_app" {
     application_stack {
       python_version = "3.11"
     }
-    cors { allowed_origins = [replace(azurerm_storage_account.storage.primary_web_endpoint, "/", "")] }
+    cors { allowed_origins = [trimsuffix(azurerm_storage_account.storage.primary_web_endpoint, "/")] }
   }
 
   app_settings = {
