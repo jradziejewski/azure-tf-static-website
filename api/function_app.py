@@ -33,10 +33,7 @@ def get_count(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
             json.dumps({"count": item["count"]}),
             status_code=200,
-            headers={
-                "Acess-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET",
-            })
+        )
     except Exception as e:
         logging.error(f"Error accessing Cosmos DB: {e}")
         return func.HttpResponse(
